@@ -79,4 +79,42 @@ class OrderProcessorMockTest {
     // }
     // -----------------------------------------------------------------------
 
+    @Test
+    void process_inventoryNotAvailable_returnsNull() {
+        cart.addItem(widget, 2);
+
+        when(inventoryService.isAvailable(widget, 2)).thenReturn(false);
+
+
+        Order order = orderProcessor.process("customer-2", cart);
+
+        assertThat(order).isNull();
+        verify(paymentGateway, never()).charge(anyString(), anyDouble());
+    }
+
+    @Test
+    void process_paymentFails_returnsNull() {
+        cart.addItem(widget, 2);
+        when(inventoryService.isAvailable(widget, 2)).thenReturn(true);
+        when(paymentGateway.charge("customer-3", 50.0)).thenReturn(false);
+
+        Order order = orderProcessor.process("customer-3", cart);
+
+        assertThat(order).isNull();
+        verify(paymentGateway).charge("customer-3", 50.0);
+    }
+
+    @Test
+    void process_partialInventory_returnsNull() {
+        Product gadget = new Product("P002", "Gadget", 15.0, 100);
+        cart.addItem(widget, 2);
+        cart.addItem(gadget, 3);
+
+        when(inventoryService.isAvailable(widget, 2)).thenReturn(true);
+        when(inventoryService.isAvailable(gadget, 3)).thenReturn(false);
+
+        Order order = orderProcessor.process("customer-4", cart);
+        assertThat(order).isNull();
+        verify(paymentGateway, never()).charge(anyString(), anyDouble());
+    }
 }
