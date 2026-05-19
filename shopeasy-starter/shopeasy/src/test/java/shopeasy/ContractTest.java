@@ -69,4 +69,37 @@ class ContractTest {
     // }
     // -----------------------------------------------------------------------
 
+    @Test
+    void calculateOverflows(){
+        assertThatThrownBy(() -> calculator.calculate(-1, 0, 100))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void calculateOutOfBoundry(){
+        assertThatThrownBy(() -> calculator.calculate(100, -1, 0))
+                .isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> calculator.calculate(100, 0, -1))
+                .isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> calculator.calculate(100, 101, 0))
+                .isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> calculator.calculate(100, 0, 101))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void addingNullandNegativeQuantity(){
+        assertThatThrownBy(() -> cart.addItem(null, 1))
+                .isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> cart.addItem(product, 0))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void applyDiscountOutOfBoundry(){
+        assertThatThrownBy(() -> cart.applyDiscount(-1))
+                .isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> cart.applyDiscount(101))
+                .isInstanceOf(AssertionError.class);
+    }
 }

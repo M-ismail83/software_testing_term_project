@@ -32,17 +32,17 @@ public class ShoppingCart {
      * @param quantity number of units to add (must be > 0)
      */
     public void addItem(Product product, int quantity) {
-        // TODO (Task 3): add assert pre-condition here
+        assert product != null && quantity > 0 : "Pre-conditions failed: product must not be null and quantity must be > 0";
 
         for (CartItem item : items) {
             if (item.getProduct().getId().equals(product.getId())) {
                 item.setQuantity(item.getQuantity() + quantity);
-                // TODO (Task 3): add assert post-condition here
+                assert itemCount() >= 0 : "Cart item count should not be negative";
                 return;
             }
         }
         items.add(new CartItem(product, quantity));
-        // TODO (Task 3): add assert post-condition here
+        assert itemCount() >= 0 : "Cart item count should not be negative";
     }
 
     /**
@@ -86,12 +86,12 @@ public class ShoppingCart {
      * @return the total after applying the discount
      */
     public double applyDiscount(double discountRate) {
-        // TODO (Task 3): add assert pre-condition here
+        assert discountRate >= 0 && discountRate <= 100 : "Pre-condition failed: discount rate must be between 0 and 100";
 
         double rawTotal = total();
         double discounted = rawTotal - (rawTotal * discountRate / 100);
 
-        // TODO (Task 3): add assert post-condition here
+        assert discounted >= 0 : "Discounted total should not be negative";
         return discounted;
     }
 
