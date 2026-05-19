@@ -14,6 +14,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <argLine></argLine>
     </properties>
 
     <dependencies>
@@ -62,7 +63,7 @@
                 <version>3.2.5</version>
                 <configuration>
                     <!-- Enable Java assertions for Design by Contract (Task 3) -->
-                    <argLine>@{argLine} -ea</argLine>
+                    <argLine>${argLine} -ea</argLine>
                 </configuration>
             </plugin>
 
