@@ -38,35 +38,69 @@ import static org.assertj.core.api.Assertions.*;
  */
 class ShopEasyPropertyTest {
 
-    // -----------------------------------------------------------------------
-    // TODO: Write your properties below.
-    //
-    // EXAMPLE STRUCTURE:
-    //
-    // /**
-    //  * Property: The final price is always non-negative.
-    //  * Bug class caught: any implementation path that produces a negative result
-    //  *                   (e.g., discount > 100 applied to negative base).
-    //  */
-    // @Property
-    // void finalPriceIsNeverNegative(
-    //         @ForAll @DoubleRange(min = 0, max = 10_000) double base,
-    //         @ForAll @DoubleRange(min = 0, max = 100)   double discount,
-    //         @ForAll @DoubleRange(min = 0, max = 100)   double tax) {
-    //
-    //     PriceCalculator calc = new PriceCalculator();
-    //     double result = calc.calculate(base, discount, tax);
-    //     assertThat(result).isGreaterThanOrEqualTo(0.0);
-    // }
-    //
-    // // Custom provider example:
-    // @Provide
-    // Arbitrary<Product> validProducts() {
-    //     return Combinators.combine(
-    //             Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(5),
-    //             Arbitraries.doubles().between(0.01, 500.0)
-    //     ).as((name, price) -> new Product("P-" + name, name, price, 100));
-    // }
-    // -----------------------------------------------------------------------
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Property 1: Identity (PriceCalculator)
+    ////////////////////////////////////////////////////////////////////////////
+    //If a product has a 0% discount and a 0% tax rate, the final calculated price must be exactly equal to the original base price
+    @Property
+    void identityProperty(
+            @ForAll @DoubleRange(min = 0.0, max = 10_000.0) double base) {
+        
+        PriceCalculator calc = new PriceCalculator();
+        double result = calc.calculate(base, 0.0, 0.0);
+        
+        assertThat(result).isCloseTo(base, within(0.001));
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+
+    // Property 2: Monotonicity (PriceCalculator)
+    //////////////////////////////////////////////////////////////////////////////
+
+    //applying a higher discount rate should never result in a higher final price than a lower discount rate
+    @Property
+    void monotonicityProperty(
+            @ForAll @DoubleRange(min = 0.0, max = 10_000.0) double base,
+            @ForAll @DoubleRange(min = 0.0, max = 100.0) double tax,
+            @ForAll @DoubleRange(min = 0.0, max = 100.0) double discount1,
+            @ForAll @DoubleRange(min = 0.0, max = 100.0) double discount2) {
+
+        // We sort the randomly generated discounts to guarantee lowerDiscount <= higherDiscount
+        double lowerDiscount = Math.min(discount1, discount2);
+        double higherDiscount = Math.max(discount1, discount2);
+
+        PriceCalculator calc = new PriceCalculator();
+        double priceWithLowerDiscount = calc.calculate(base, lowerDiscount, tax);
+        double priceWithHigherDiscount = calc.calculate(base, higherDiscount, tax);
+
+        assertThat(priceWithHigherDiscount).isLessThanOrEqualTo(priceWithLowerDiscount);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Property 3: Boundedness (PriceCalculator)
+    ////////////////////////////////////////////////////////////////////////////
+    //final calculated price can never fall below zero, with a positive base price and valid discount/tax rates
+
+    @Property
+    void boundednessProperty(
+            @ForAll @DoubleRange(min = 0.0, max = 10_000.0) double base,
+            @ForAll("validRates") double discount,
+            @ForAll("validRates") double tax) {
+
+        PriceCalculator calc = new PriceCalculator();
+        double result = calc.calculate(base, discount, tax);
+
+        assertThat(result).isGreaterThanOrEqualTo(0.0);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Custom Provider (Required by Task 4)
+    ////////////////////////////////////////////////////////////////////////////
+    //Generates valid percentage rates (0.0 to 100.0) for taxes and discounts
+    @Provide
+    Arbitrary<Double> validRates() {
+        return Arbitraries.doubles().between(0.0, 100.0);
+    }
 
 }
