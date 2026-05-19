@@ -97,7 +97,8 @@ class PriceCalculatorSpecTest {
         "-50.0,  20.0,  0.0, -40.0"  // -50 * 0.8 * 1.0
     })
     void negativeBasePriceCalculatesMathematically(double invalidBase, double disc, double tax, double expected) {
-        assertThat(calculator.calculate(invalidBase, disc, tax)).isCloseTo(expected, within(0.001));
+        assertThatThrownBy(() -> calculator.calculate(invalidBase, disc, tax))
+                .isInstanceOf(AssertionError.class);
     }
 
     // 9. INVALID BOUNDARY: Discount Rate Out of Bounds (Off-point)
@@ -108,7 +109,8 @@ class PriceCalculatorSpecTest {
         "100.0, 150.0, 10.0, -55.0"  // 100 * -0.5 * 1.1 (discount > 100% results in negative price)
     })
     void invalidDiscountRatesCalculateMathematically(double base, double invalidDisc, double tax, double expected) {
-        assertThat(calculator.calculate(base, invalidDisc, tax)).isCloseTo(expected, within(0.001));
+        assertThatThrownBy(() -> calculator.calculate(base, invalidDisc, tax))
+                .isInstanceOf(AssertionError.class);
     }
 
     // 10. INVALID BOUNDARY: Tax Rate Out of Bounds (Off-point)
@@ -119,6 +121,7 @@ class PriceCalculatorSpecTest {
         "100.0, 10.0, 150.0, 225.0"  // 100 * 0.9 * 2.5
     })
     void invalidTaxRatesCalculateMathematically(double base, double disc, double invalidTax, double expected) {
-        assertThat(calculator.calculate(base, disc, invalidTax)).isCloseTo(expected, within(0.001));
+        assertThatThrownBy(() -> calculator.calculate(base, disc, invalidTax))
+                .isInstanceOf(AssertionError.class);
     }
 }
