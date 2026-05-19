@@ -44,7 +44,7 @@ class ShoppingCartStructuralTest {
     @BeforeEach
     void setUp() {
         cart   = new ShoppingCart();
-        apple  = new Product("P001", "Apple",  1.50, 100);
+        apple  = new Product("P001", "Apple",  1.50, 150);
         banana = new Product("P002", "Banana", 0.80, 50);
     }
 
@@ -55,5 +55,65 @@ class ShoppingCartStructuralTest {
     //
     // HINT: Run `mvn test` after every few tests to see coverage progress.
     // -----------------------------------------------------------------------
+
+    @Test
+    void addingItemTest(){
+        cart.addItem(apple, 50);
+        assertThat(cart.getItems().get(0).getQuantity()).isEqualTo(50);
+        cart.addItem(apple, 20);
+        assertThat(cart.getItems().get(0).getQuantity()).isEqualTo(70);
+        cart.addItem(banana, 30);
+        assertThat(cart.getItems().get(1).getQuantity()).isEqualTo(30);
+    }
+
+    @Test
+    void updatingQuantityTest(){
+        cart.addItem(apple, 80);
+        cart.updateQuantity(apple.getId(), 20);
+        assertThat(cart.getItems().get(0).getQuantity()).isEqualTo(20);
+    }
+    
+    @Test
+    void toStringTest(){
+        String cartList = cart.toString();
+        assertThat(cartList).contains(String.valueOf(cart.itemCount()));
+    }
+
+    @Test
+    void removingItemTest(){
+        cart.addItem(banana, 20);
+        cart.removeItem(banana.getId());
+        assertThat(cart.getItems().contains(banana)).isFalse();
+        cart.removeItem("P999");
+        assertThat(cart.getItems().contains(banana)).isFalse();
+    }
+
+
+    @Test
+    void updatingQuantityInvalidTest(){
+        assertThatThrownBy(() -> cart.updateQuantity(apple.getId(), -5))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> cart.updateQuantity("P999", 10))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> cart.updateQuantity("", 10))
+                .isInstanceOf(IllegalArgumentException.class);
+
+    }
+
+    @Test
+    void discountTest(){
+        double totalCost = cart.total();
+        double discountedCost = cart.applyDiscount(20);
+        assertThat(discountedCost).isEqualTo(totalCost * 0.8);
+    }
+
+    @Test
+    void clearTest(){
+        cart.clear();
+        assertThat(cart.itemCount()).isEqualTo(0);
+        assertThat(cart.total()).isEqualTo(0);
+    }
+
+
 
 }
